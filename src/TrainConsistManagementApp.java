@@ -20,7 +20,7 @@ public class TrainConsistManagementApp {
 
     public static void main(String[] args) {
 
-        System.out.println(" UC12 - Safety Compliance Check ");
+        System.out.println(" UC13 - Safety Compliance Check ");
 
         List<GoodsBogie> goodsBogies = new ArrayList<>();
 
