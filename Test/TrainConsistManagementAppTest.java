@@ -1,108 +1,57 @@
 import org.junit.jupiter.api.Test;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TrainConsistManagementAppTest {
 
-    static class Bogie {
-        String name;
-        int capacity;
+    private final String trainPattern = "TRN-\\d{4}";
+    private final String cargoPattern = "PET-[A-Z]{2}";
 
-        Bogie(String name, int capacity) {
-            this.name = name;
-            this.capacity = capacity;
-        }
-    }
-
-    // Helper method
-    private int calculateTotal(List<Bogie> bogies) {
-        return bogies.stream()
-                .map(b -> b.capacity)
-                .reduce(0, Integer::sum);
+    @Test
+    void testRegex_ValidTrainID() {
+        assertTrue(Pattern.matches(trainPattern, "TRN-1234"));
     }
 
     @Test
-    void testReduce_TotalSeatCalculation() {
-        List<Bogie> bogies = List.of(
-                new Bogie("Sleeper", 72),
-                new Bogie("AC Chair", 56)
-        );
-
-        int result = calculateTotal(bogies);
-
-        assertEquals(128, result);
+    void testRegex_InvalidTrainIDFormat() {
+        assertFalse(Pattern.matches(trainPattern, "TRAIN12"));
+        assertFalse(Pattern.matches(trainPattern, "TRN12A"));
+        assertFalse(Pattern.matches(trainPattern, "1234-TRN"));
     }
 
     @Test
-    void testReduce_MultipleBogiesAggregation() {
-        List<Bogie> bogies = List.of(
-                new Bogie("Sleeper", 72),
-                new Bogie("AC Chair", 56),
-                new Bogie("First Class", 24)
-        );
-
-        int result = calculateTotal(bogies);
-
-        assertEquals(152, result);
+    void testRegex_ValidCargoCode() {
+        assertTrue(Pattern.matches(cargoPattern, "PET-AB"));
     }
 
     @Test
-    void testReduce_SingleBogieCapacity() {
-        List<Bogie> bogies = List.of(
-                new Bogie("Sleeper", 72)
-        );
-
-        int result = calculateTotal(bogies);
-
-        assertEquals(72, result);
+    void testRegex_InvalidCargoCodeFormat() {
+        assertFalse(Pattern.matches(cargoPattern, "PET-ab"));
+        assertFalse(Pattern.matches(cargoPattern, "PET123"));
+        assertFalse(Pattern.matches(cargoPattern, "AB-PET"));
     }
 
     @Test
-    void testReduce_EmptyBogieList() {
-        List<Bogie> bogies = new ArrayList<>();
-
-        int result = calculateTotal(bogies);
-
-        assertEquals(0, result);
+    void testRegex_TrainIDDigitLengthValidation() {
+        assertFalse(Pattern.matches(trainPattern, "TRN-123"));
+        assertFalse(Pattern.matches(trainPattern, "TRN-12345"));
     }
 
     @Test
-    void testReduce_CorrectCapacityExtraction() {
-        List<Bogie> bogies = List.of(
-                new Bogie("Sleeper", 70),
-                new Bogie("AC Chair", 60)
-        );
-
-        int result = calculateTotal(bogies);
-
-        assertEquals(130, result);
+    void testRegex_CargoCodeUppercaseValidation() {
+        assertFalse(Pattern.matches(cargoPattern, "PET-Ab"));
     }
 
     @Test
-    void testReduce_AllBogiesIncluded() {
-        List<Bogie> bogies = List.of(
-                new Bogie("Sleeper", 72),
-                new Bogie("AC Chair", 56),
-                new Bogie("First Class", 24),
-                new Bogie("Sleeper", 70)
-        );
-
-        int result = calculateTotal(bogies);
-
-        assertEquals(222, result);
+    void testRegex_EmptyInputHandling() {
+        assertFalse(Pattern.matches(trainPattern, ""));
+        assertFalse(Pattern.matches(cargoPattern, ""));
     }
 
     @Test
-    void testReduce_OriginalListUnchanged() {
-        List<Bogie> bogies = new ArrayList<>();
-        bogies.add(new Bogie("Sleeper", 72));
-
-        List<Bogie> copy = new ArrayList<>(bogies);
-
-        calculateTotal(bogies);
-
-        assertEquals(copy.size(), bogies.size());
+    void testRegex_ExactPatternMatch() {
+        assertFalse(Pattern.matches(trainPattern, "TRN-1234X"));
+        assertFalse(Pattern.matches(cargoPattern, "PET-AB1"));
     }
 }
