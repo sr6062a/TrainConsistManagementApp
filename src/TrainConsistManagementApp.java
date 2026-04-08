@@ -1,24 +1,43 @@
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TrainConsistManagementApp {
 
+    // Goods Bogie model
+    static class GoodsBogie {
+        String type;
+        String cargo;
+
+        GoodsBogie(String type, String cargo) {
+            this.type = type;
+            this.cargo = cargo;
+        }
+
+        public String toString() {
+            return type + " -> " + cargo;
+        }
+    }
+
     public static void main(String[] args) {
 
-        System.out.println(" UC11 - Validate Train ID & Cargo Code ");
+        System.out.println(" UC12 - Safety Compliance Check ");
 
-        String trainId = "TRN-1234";
-        String cargoCode = "PET-AB";
+        List<GoodsBogie> goodsBogies = new ArrayList<>();
 
-        String trainPattern = "TRN-\\d{4}";
-        String cargoPattern = "PET-[A-Z]{2}";
+        goodsBogies.add(new GoodsBogie("Cylindrical", "Petroleum"));
+        goodsBogies.add(new GoodsBogie("Open", "Coal"));
+        goodsBogies.add(new GoodsBogie("Box", "Grain"));
 
-        boolean isTrainValid = Pattern.matches(trainPattern, trainId);
-        boolean isCargoValid = Pattern.matches(cargoPattern, cargoCode);
+        System.out.println("Goods Bogies:");
+        goodsBogies.forEach(System.out::println);
 
-        System.out.println("Train ID: " + trainId + " -> " +
-                (isTrainValid ? "VALID" : "INVALID"));
+        boolean isSafe = goodsBogies.stream()
+                .allMatch(b ->
+                        !b.type.equals("Cylindrical") ||
+                                b.cargo.equals("Petroleum")
+                );
 
-        System.out.println("Cargo Code: " + cargoCode + " -> " +
-                (isCargoValid ? "VALID" : "INVALID"));
+        System.out.println("\nSafety Status: " +
+                (isSafe ? "SAFE TRAIN" : "UNSAFE TRAIN"));
     }
 }
