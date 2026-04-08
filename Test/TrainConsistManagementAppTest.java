@@ -17,103 +17,91 @@ class TrainConsistManagementAppTest {
     }
 
     // Helper method
-    private Map<String, List<Bogie>> groupBogies(List<Bogie> bogies) {
+    private int calculateTotal(List<Bogie> bogies) {
         return bogies.stream()
-                .collect(Collectors.groupingBy(b -> b.name));
+                .map(b -> b.capacity)
+                .reduce(0, Integer::sum);
     }
 
     @Test
-    void testGrouping_BogiesGroupedByType() {
+    void testReduce_TotalSeatCalculation() {
         List<Bogie> bogies = List.of(
                 new Bogie("Sleeper", 72),
-                new Bogie("Sleeper", 70)
+                new Bogie("AC Chair", 56)
         );
 
-        Map<String, List<Bogie>> result = groupBogies(bogies);
+        int result = calculateTotal(bogies);
 
-        assertTrue(result.containsKey("Sleeper"));
-        assertEquals(2, result.get("Sleeper").size());
+        assertEquals(128, result);
     }
 
     @Test
-    void testGrouping_MultipleBogiesInSameGroup() {
+    void testReduce_MultipleBogiesAggregation() {
         List<Bogie> bogies = List.of(
+                new Bogie("Sleeper", 72),
                 new Bogie("AC Chair", 56),
-                new Bogie("AC Chair", 60)
-        );
-
-        Map<String, List<Bogie>> result = groupBogies(bogies);
-
-        assertEquals(2, result.get("AC Chair").size());
-    }
-
-    @Test
-    void testGrouping_DifferentBogieTypes() {
-        List<Bogie> bogies = List.of(
-                new Bogie("Sleeper", 72),
                 new Bogie("First Class", 24)
         );
 
-        Map<String, List<Bogie>> result = groupBogies(bogies);
+        int result = calculateTotal(bogies);
 
-        assertEquals(2, result.size());
+        assertEquals(152, result);
     }
 
     @Test
-    void testGrouping_EmptyBogieList() {
-        List<Bogie> bogies = new ArrayList<>();
-
-        Map<String, List<Bogie>> result = groupBogies(bogies);
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void testGrouping_SingleBogieCategory() {
+    void testReduce_SingleBogieCapacity() {
         List<Bogie> bogies = List.of(
                 new Bogie("Sleeper", 72)
         );
 
-        Map<String, List<Bogie>> result = groupBogies(bogies);
+        int result = calculateTotal(bogies);
 
-        assertEquals(1, result.size());
+        assertEquals(72, result);
     }
 
     @Test
-    void testGrouping_MapContainsCorrectKeys() {
+    void testReduce_EmptyBogieList() {
+        List<Bogie> bogies = new ArrayList<>();
+
+        int result = calculateTotal(bogies);
+
+        assertEquals(0, result);
+    }
+
+    @Test
+    void testReduce_CorrectCapacityExtraction() {
         List<Bogie> bogies = List.of(
-                new Bogie("Sleeper", 72),
-                new Bogie("AC Chair", 60),
-                new Bogie("First Class", 24)
+                new Bogie("Sleeper", 70),
+                new Bogie("AC Chair", 60)
         );
 
-        Map<String, List<Bogie>> result = groupBogies(bogies);
+        int result = calculateTotal(bogies);
 
-        assertTrue(result.containsKey("Sleeper"));
-        assertTrue(result.containsKey("AC Chair"));
-        assertTrue(result.containsKey("First Class"));
+        assertEquals(130, result);
     }
 
     @Test
-    void testGrouping_GroupSizeValidation() {
+    void testReduce_AllBogiesIncluded() {
         List<Bogie> bogies = List.of(
                 new Bogie("Sleeper", 72),
+                new Bogie("AC Chair", 56),
+                new Bogie("First Class", 24),
                 new Bogie("Sleeper", 70)
         );
 
-        Map<String, List<Bogie>> result = groupBogies(bogies);
+        int result = calculateTotal(bogies);
 
-        assertEquals(2, result.get("Sleeper").size());
+        assertEquals(222, result);
     }
 
     @Test
-    void testGrouping_OriginalListUnchanged() {
+    void testReduce_OriginalListUnchanged() {
         List<Bogie> bogies = new ArrayList<>();
         bogies.add(new Bogie("Sleeper", 72));
 
         List<Bogie> copy = new ArrayList<>(bogies);
 
-        groupBogies(bogies);
+        calculateTotal(bogies);
 
         assertEquals(copy.size(), bogies.size());
     }
