@@ -1,43 +1,47 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class TrainConsistManagementApp {
 
-    // Goods Bogie model
-    static class GoodsBogie {
-        String type;
-        String cargo;
+    static class InvalidCapacityException extends Exception {
+        public InvalidCapacityException(String message) {
+            super(message);
+        }
+    }
 
-        GoodsBogie(String type, String cargo) {
+    static class PassengerBogie {
+        String type;
+        int capacity;
+
+        PassengerBogie(String type, int capacity) throws InvalidCapacityException {
+
+            if (capacity <= 0) {
+                throw new InvalidCapacityException("Capacity must be greater than zero");
+            }
+
             this.type = type;
-            this.cargo = cargo;
+            this.capacity = capacity;
         }
 
         public String toString() {
-            return type + " -> " + cargo;
+            return type + " -> " + capacity;
         }
     }
 
     public static void main(String[] args) {
 
-        System.out.println(" UC13 - Safety Compliance Check ");
+        System.out.println(" UC14 - Custom Exception Validation ");
 
-        List<GoodsBogie> goodsBogies = new ArrayList<>();
+        try {
+            PassengerBogie b1 = new PassengerBogie("Sleeper", 72);
+            System.out.println("Created: " + b1);
 
-        goodsBogies.add(new GoodsBogie("Cylindrical", "Petroleum"));
-        goodsBogies.add(new GoodsBogie("Open", "Coal"));
-        goodsBogies.add(new GoodsBogie("Box", "Grain"));
+            PassengerBogie b2 = new PassengerBogie("AC Chair", -10);
+            System.out.println("Created: " + b2);
 
-        System.out.println("Goods Bogies:");
-        goodsBogies.forEach(System.out::println);
+        } catch (InvalidCapacityException e) {
+            System.out.println("Exception: " + e.getMessage());
+        }
 
-        boolean isSafe = goodsBogies.stream()
-                .allMatch(b ->
-                        !b.type.equals("Cylindrical") ||
-                                b.cargo.equals("Petroleum")
-                );
-
-        System.out.println("\nSafety Status: " +
-                (isSafe ? "SAFE TRAIN" : "UNSAFE TRAIN"));
+        System.out.println("\nProgram continues safely...");
     }
 }

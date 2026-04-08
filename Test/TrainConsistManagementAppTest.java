@@ -1,92 +1,72 @@
 import org.junit.jupiter.api.Test;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class TrainConsistManagementAppTest {
 
-    static class Bogie {
+    static class InvalidCapacityException extends Exception {
+        public InvalidCapacityException(String message) {
+            super(message);
+        }
+    }
+
+    static class PassengerBogie {
         String type;
         int capacity;
 
-        Bogie(String type, int capacity) {
+        PassengerBogie(String type, int capacity) throws InvalidCapacityException {
+            if (capacity <= 0) {
+                throw new InvalidCapacityException("Capacity must be greater than zero");
+            }
             this.type = type;
             this.capacity = capacity;
         }
     }
 
-    private List<Bogie> loopFilter(List<Bogie> bogies) {
-        List<Bogie> result = new ArrayList<>();
-        for (Bogie b : bogies) {
-            if (b.capacity > 60) {
-                result.add(b);
-            }
-        }
-        return result;
-    }
-
-    private List<Bogie> streamFilter(List<Bogie> bogies) {
-        return bogies.stream()
-                .filter(b -> b.capacity > 60)
-                .collect(Collectors.toList());
+    @Test
+    void testException_ValidCapacityCreation() throws InvalidCapacityException {
+        PassengerBogie b = new PassengerBogie("Sleeper", 72);
+        assertEquals(72, b.capacity);
     }
 
     @Test
-    void testLoopFilteringLogic() {
-        List<Bogie> bogies = List.of(
-                new Bogie("Sleeper", 70),
-                new Bogie("AC", 50)
-        );
+    void testException_NegativeCapacityThrowsException() {
+        Exception e = assertThrows(InvalidCapacityException.class, () -> {
+            new PassengerBogie("Sleeper", -10);
+        });
 
-        List<Bogie> result = loopFilter(bogies);
-
-        assertEquals(1, result.size());
+        assertEquals("Capacity must be greater than zero", e.getMessage());
     }
 
     @Test
-    void testStreamFilteringLogic() {
-        List<Bogie> bogies = List.of(
-                new Bogie("Sleeper", 70),
-                new Bogie("AC", 50)
-        );
-
-        List<Bogie> result = streamFilter(bogies);
-
-        assertEquals(1, result.size());
+    void testException_ZeroCapacityThrowsException() {
+        assertThrows(InvalidCapacityException.class, () -> {
+            new PassengerBogie("AC", 0);
+        });
     }
 
     @Test
-    void testLoopAndStreamResultsMatch() {
-        List<Bogie> bogies = List.of(
-                new Bogie("Sleeper", 70),
-                new Bogie("AC", 80)
-        );
+    void testException_ExceptionMessageValidation() {
+        Exception e = assertThrows(InvalidCapacityException.class, () -> {
+            new PassengerBogie("AC", -5);
+        });
 
-        assertEquals(
-                loopFilter(bogies).size(),
-                streamFilter(bogies).size()
-        );
+        assertEquals("Capacity must be greater than zero", e.getMessage());
     }
 
     @Test
-    void testExecutionTimeMeasurement() {
-        long start = System.nanoTime();
-        long end = System.nanoTime();
+    void testException_ObjectIntegrityAfterCreation() throws InvalidCapacityException {
+        PassengerBogie b = new PassengerBogie("Sleeper", 72);
 
-        assertTrue((end - start) >= 0);
+        assertEquals("Sleeper", b.type);
+        assertEquals(72, b.capacity);
     }
 
     @Test
-    void testLargeDatasetProcessing() {
-        List<Bogie> bogies = new ArrayList<>();
+    void testException_MultipleValidBogiesCreation() throws InvalidCapacityException {
+        PassengerBogie b1 = new PassengerBogie("Sleeper", 72);
+        PassengerBogie b2 = new PassengerBogie("AC Chair", 60);
 
-        for (int i = 0; i < 10000; i++) {
-            bogies.add(new Bogie("Sleeper", i % 100));
-        }
-
-        List<Bogie> result = streamFilter(bogies);
-
-        assertNotNull(result);
+        assertNotNull(b1);
+        assertNotNull(b2);
     }
 }
